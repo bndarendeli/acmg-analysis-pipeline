@@ -101,6 +101,178 @@ input_dir/
             └── <dataset>_merged_results.tsv
 ```
 
+---
+
+## 📝 Ground Truth Preparation
+
+The pipeline can prepare ground truth files from annotated VCF files, or you can provide pre-prepared ground truth files.
+
+### Option 1: Automated Ground Truth Preparation (Recommended)
+
+The pipeline includes a ground truth preparation module that extracts variant classifications from VCF files annotated with ClinVar/HGMD data.
+
+**What it does:**
+- Extracts variant coordinates, classifications, and ACMG codes from VCF
+- Standardizes classification labels
+- Creates both complete and NotVUS (non-VUS) versions
+- Outputs Excel or TSV format
+
+**Usage:**
+```bash
+# Prepare ground truth from VCF
+python bin/prepare_ground_truth.py \
+  --vcf /path/to/annotated_variants.vcf \
+  --dataset clingen_28012026 \
+  --output-dir ground_truth \
+  --format excel \
+  --create-notvus
+```
+
+**VCF Requirements:**
+Your VCF file should contain these INFO fields:
+- `CLASSIFICATION` - Variant classification (Pathogenic, Benign, VUS, etc.)
+- `MET_CODES` - ACMG criteria codes that are met
+- `NOT_MET_CODES` - ACMG criteria codes that are not met
+- `GENE` - Gene symbol
+
+**Output:**
+- `{dataset}_ground_truth.xlsx` - All variants
+- `{dataset}_notvus_ground_truth.xlsx` - Non-VUS variants only (for VUS misclassification analysis)
+
+### Creating Master Ground Truth (Multiple Datasets)
+
+Combine multiple individual dataset ground truths into a single master ground truth for cross-dataset analysis:
+
+```bash
+# Combine multiple ground truth files
+python bin/create_master_ground_truth.py \
+  --input-files \
+    ground_truth/clingen_28012026_ground_truth.xlsx \
+    ground_truth/foxl2_ground_truth.xlsx \
+    ground_truth/hgmd_clinvar_cancer_ground_truth.xlsx \
+  --output ground_truth/master_ground_truth.xlsx \
+  --create-notvus
+```
+
+**What it does:**
+- Combines multiple dataset ground truths into one file
+- Preserves dataset labels for cross-dataset comparison
+- Creates both complete and NotVUS master versions
+- Useful for analyzing tool performance across multiple datasets
+
+**Output:**
+- `master_ground_truth.xlsx` - All variants from all datasets
+- `master_notvus_ground_truth.xlsx` - Non-VUS variants from all datasets
+
+### Option 2: Manual Ground Truth Preparation
+
+If you prefer to create ground truth files manually, follow these format requirements:
+
+### FOXL2 Dataset Format (Excel)
+
+For FOXL2 datasets, use an Excel file (`.xlsx`) with the following columns:
+
+| Column | Required | Description | Example |
+|--------|----------|-------------|---------|
+| `hg38` | Yes | Variant coordinates (hg38) | `chr3-138946704-CG-C` |
+| `hg19` | Optional | Variant coordinates (hg19) | `chr3-138945020-CG-C` |
+| `HGVS` | Yes | HGVS notation | `NM_023067.4:c.402dupC` |
+| `Classification` | Yes | Ground truth classification | `Pathogenic`, `Benign`, `VUS`, etc. |
+| `ACMG-AMP classification` | Optional | ACMG criteria codes | `PVS1,PM2,PP3` |
+
+**Example FOXL2 ground truth:**
+```
+hg38                        hg19                        HGVS                    Classification  ACMG-AMP classification
+chr3-138946704-CG-C        chr3-138945020-CG-C         NM_023067.4:c.402dupC   Pathogenic      PVS1,PM2,PP3
+chr3-138946729-C-T         chr3-138945045-C-T          NM_023067.4:c.427C>T    Pathogenic      PS3,PM1,PM2,PP3
+chr3-138946750-G-A         chr3-138945066-G-A          NM_023067.4:c.448G>A    Benign          BA1
+```
+
+### ClinGen/HGMD-ClinVar Format (TSV)
+
+For ClinGen and HGMD-ClinVar datasets, use a TSV file with these columns:
+
+| Column | Required | Description | Example |
+|--------|----------|-------------|---------|
+| `Variant_Key` | Yes | Variant identifier | `1-12345-A-T` |
+| `CHROM` | Yes | Chromosome | `1` |
+| `POS` | Yes | Position | `12345` |
+| `REF` | Yes | Reference allele | `A` |
+| `ALT` | Yes | Alternate allele | `T` |
+| `Ground_Truth_Classification` | Yes | Classification | `Pathogenic`, `Benign`, etc. |
+| `Ground_Truth_ACMG` | Optional | ACMG criteria | `PS1,PM2,PP3` |
+
+**Example ClinGen ground truth (TSV):**
+```tsv
+Variant_Key    CHROM  POS     REF  ALT  Ground_Truth_Classification  Ground_Truth_ACMG
+1-12345-A-T    1      12345   A    T    Pathogenic                   PS1,PM2,PP3
+2-67890-G-C    2      67890   G    C    Benign                       BA1
+3-11111-C-T    3      11111   C    T    VUS                          PM2
+```
+
+### Creating Your Ground Truth File
+
+**Step 1: Collect Variant Information**
+- Variant coordinates (chromosome, position, ref, alt)
+- HGVS notation (recommended)
+- Expert-curated classifications
+
+**Step 2: Format According to Dataset Type**
+
+For **FOXL2-like datasets** (Excel):
+```python
+import pandas as pd
+
+data = {
+    'hg38': ['chr3-138946704-CG-C', 'chr3-138946729-C-T'],
+    'hg19': ['chr3-138945020-CG-C', 'chr3-138945045-C-T'],
+    'HGVS': ['NM_023067.4:c.402dupC', 'NM_023067.4:c.427C>T'],
+    'Classification': ['Pathogenic', 'Pathogenic'],
+    'ACMG-AMP classification': ['PVS1,PM2,PP3', 'PS3,PM1,PM2,PP3']
+}
+
+df = pd.DataFrame(data)
+df.to_excel('FOXL2_dataset.xlsx', index=False)
+```
+
+For **ClinGen/HGMD-ClinVar datasets** (TSV):
+```python
+import pandas as pd
+
+data = {
+    'Variant_Key': ['1-12345-A-T', '2-67890-G-C'],
+    'CHROM': ['1', '2'],
+    'POS': [12345, 67890],
+    'REF': ['A', 'G'],
+    'ALT': ['T', 'C'],
+    'Ground_Truth_Classification': ['Pathogenic', 'Benign'],
+    'Ground_Truth_ACMG': ['PS1,PM2,PP3', 'BA1']
+}
+
+df = pd.DataFrame(data)
+df.to_csv('ground_truth.tsv', sep='\t', index=False)
+```
+
+**Step 3: Validate Your Ground Truth**
+- Ensure all required columns are present
+- Check variant coordinates are correctly formatted
+- Verify classifications use standard terms: `Pathogenic`, `Likely_Pathogenic`, `VUS`, `Likely_Benign`, `Benign`
+- Remove duplicate variants
+
+### Classification Standards
+
+Use these standardized classification labels:
+
+| Label | Abbreviation | Description |
+|-------|--------------|-------------|
+| `Pathogenic` | P | Pathogenic variant |
+| `Likely_Pathogenic` | LP | Likely pathogenic variant |
+| `VUS` | VUS | Variant of uncertain significance |
+| `Likely_Benign` | LB | Likely benign variant |
+| `Benign` | B | Benign variant |
+
+---
+
 ## ⚙️ Configuration File
 
 Create `conf/datasets_config.json` to specify dataset-specific settings:
@@ -183,7 +355,42 @@ results/
 
 ## 📝 Examples
 
-### Example 1: Analyze FOXL2 Dataset
+### Example 1: Prepare Ground Truth from VCF
+
+```bash
+# Prepare ground truth for ClinGen dataset
+python bin/prepare_ground_truth.py \
+  --vcf datasets/clingen_28012026/clingen_28012026_hg38.vcf \
+  --dataset clingen_28012026 \
+  --output-dir ground_truth \
+  --format excel \
+  --create-notvus
+
+# This creates:
+# - clingen_28012026_ground_truth.xlsx (all variants)
+# - clingen_28012026_notvus_ground_truth.xlsx (non-VUS only)
+```
+
+### Example 2: Create Master Ground Truth
+
+```bash
+# Combine multiple datasets into master ground truth
+python bin/create_master_ground_truth.py \
+  --input-files \
+    ground_truth/clingen_28012026_ground_truth.xlsx \
+    ground_truth/clingen_cancerpredisposition_28012026_ground_truth.xlsx \
+    ground_truth/clingen_hearing_loss_28012026_ground_truth.xlsx \
+    ground_truth/hgmd_clinvar_cancer_ground_truth.xlsx \
+    ground_truth/hgmd_clinvar_hl_ground_truth.xlsx \
+  --output ground_truth/master_ground_truth_5datasets.xlsx \
+  --create-notvus
+
+# This creates:
+# - master_ground_truth_5datasets.xlsx (all variants from 5 datasets)
+# - master_notvus_ground_truth_5datasets.xlsx (non-VUS only)
+```
+
+### Example 3: Analyze FOXL2 Dataset
 
 ```bash
 nextflow run main.nf \
@@ -193,7 +400,7 @@ nextflow run main.nf \
   --outdir results/foxl2
 ```
 
-### Example 2: Analyze ClinGen Dataset
+### Example 4: Analyze ClinGen Dataset
 
 ```bash
 nextflow run main.nf \
@@ -203,7 +410,7 @@ nextflow run main.nf \
   --outdir results/clingen
 ```
 
-### Example 3: Analyze HGMD-ClinVar Dataset
+### Example 5: Analyze HGMD-ClinVar Dataset
 
 ```bash
 nextflow run main.nf \
@@ -213,7 +420,7 @@ nextflow run main.nf \
   --outdir results/hgmd_clinvar
 ```
 
-### Example 4: Multiple Datasets
+### Example 6: Multiple Datasets
 
 ```bash
 nextflow run main.nf \
@@ -223,7 +430,7 @@ nextflow run main.nf \
   --outdir results/all_datasets
 ```
 
-### Example 5: Skip Parsing (Use Existing Merged Results)
+### Example 7: Skip Parsing (Use Existing Merged Results)
 
 ```bash
 nextflow run main.nf \
@@ -233,7 +440,7 @@ nextflow run main.nf \
   --outdir results/foxl2_analysis_only
 ```
 
-### Example 6: Custom Tools Selection
+### Example 8: Custom Tools Selection
 
 ```bash
 nextflow run main.nf \
@@ -243,7 +450,7 @@ nextflow run main.nf \
   --skip_parsing
 ```
 
-### Example 7: Resume Failed Run
+### Example 9: Resume Failed Run
 
 ```bash
 nextflow run main.nf -resume \

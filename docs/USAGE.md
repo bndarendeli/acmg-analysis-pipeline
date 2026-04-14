@@ -49,6 +49,35 @@ nextflow run main.nf \
 
 ## Input Data Preparation
 
+### Ground Truth File
+
+The pipeline requires a ground truth file with expert-curated variant classifications.
+
+#### Required Columns
+
+**For FOXL2 datasets (Excel format):**
+- `hg38` - Variant coordinates in hg38 (format: `chr-pos-ref-alt`)
+- `HGVS` - HGVS notation
+- `Classification` - Ground truth classification (Pathogenic, Benign, VUS, etc.)
+- `ACMG-AMP classification` - Optional ACMG criteria codes
+
+**For ClinGen/HGMD datasets (TSV format):**
+- `Variant_Key` - Unique variant identifier
+- `CHROM`, `POS`, `REF`, `ALT` - Variant coordinates
+- `Ground_Truth_Classification` - Ground truth classification
+- `Ground_Truth_ACMG` - Optional ACMG criteria codes
+
+#### Classification Labels
+
+Use standardized labels:
+- `Pathogenic` or `P`
+- `Likely_Pathogenic` or `LP`
+- `VUS` (Variant of Uncertain Significance)
+- `Likely_Benign` or `LB`
+- `Benign` or `B`
+
+### Tool Results Directory
+
 ### Directory Structure
 
 Your input directory should follow this structure:
