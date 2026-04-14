@@ -234,7 +234,17 @@ Shows how often tools incorrectly assign VUS:
 
 ## 🔧 Advanced Usage
 
-### **Multiple Datasets**
+### **Auto-Discover All Datasets**
+
+```bash
+# Process all datasets in input directory
+nextflow run main.nf \
+  --input_dir /path/to/datasets \
+  --config_file conf/datasets_config.json \
+  --outdir results
+```
+
+### **Multiple Specific Datasets**
 
 ```bash
 nextflow run main.nf \

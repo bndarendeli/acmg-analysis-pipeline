@@ -347,7 +347,7 @@ results/
 | Parameter | Required | Default | Description |
 |-----------|----------|---------|-------------|
 | `--input_dir` | Yes | - | Input directory containing datasets |
-| `--datasets` | Yes | - | Comma-separated dataset names |
+| `--datasets` | No | All datasets | Comma-separated dataset names. If not specified, all datasets in input_dir will be processed |
 | `--outdir` | No | `results` | Output directory |
 | `--tools` | No | All tools | Comma-separated tool names |
 | `--skip_parsing` | No | `false` | Skip parsing, use existing merged results |
@@ -420,17 +420,29 @@ nextflow run main.nf \
   --outdir results/hgmd_clinvar
 ```
 
-### Example 6: Multiple Datasets
+### Example 6: Auto-Discover All Datasets
+
+```bash
+# Process all datasets in input directory automatically
+nextflow run main.nf \
+  --input_dir /path/to/datasets \
+  --config_file conf/datasets_config.json \
+  --outdir results/all_datasets
+
+# Pipeline will auto-discover and process all subdirectories
+```
+
+### Example 7: Multiple Specific Datasets
 
 ```bash
 nextflow run main.nf \
   --input_dir /path/to/datasets \
   --datasets "foxl2,clingen_28012026,hgmd_clinvar_cancer" \
   --config_file conf/datasets_config.json \
-  --outdir results/all_datasets
+  --outdir results/selected_datasets
 ```
 
-### Example 7: Skip Parsing (Use Existing Merged Results)
+### Example 8: Skip Parsing (Use Existing Merged Results)
 
 ```bash
 nextflow run main.nf \
@@ -440,7 +452,7 @@ nextflow run main.nf \
   --outdir results/foxl2_analysis_only
 ```
 
-### Example 8: Custom Tools Selection
+### Example 9: Custom Tools Selection
 
 ```bash
 nextflow run main.nf \
@@ -450,7 +462,7 @@ nextflow run main.nf \
   --skip_parsing
 ```
 
-### Example 9: Resume Failed Run
+### Example 10: Resume Failed Run
 
 ```bash
 nextflow run main.nf -resume \

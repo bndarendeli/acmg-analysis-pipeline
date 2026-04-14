@@ -103,17 +103,40 @@ if (params.help) {
     exit 0
 }
 
-// Validate parameters
+// Validate required parameters
 if (!params.input_dir) {
     log.error "ERROR: --input_dir is required"
-    helpMessage()
     exit 1
 }
 
+// Auto-discover datasets if not specified
+def dataset_list
 if (!params.datasets) {
-    log.error "ERROR: --datasets is required"
-    helpMessage()
-    exit 1
+    log.info "No datasets specified, auto-discovering datasets in ${params.input_dir}..."
+    
+    def input_path = file(params.input_dir)
+    if (!input_path.exists() || !input_path.isDirectory()) {
+        log.error "ERROR: Input directory does not exist or is not a directory: ${params.input_dir}"
+        exit 1
+    }
+    
+    // Find all subdirectories in input_dir
+    def discovered_datasets = []
+    input_path.eachDir { dir ->
+        discovered_datasets << dir.name
+    }
+    
+    if (discovered_datasets.isEmpty()) {
+        log.error "ERROR: No datasets found in ${params.input_dir}"
+        log.error "       Please ensure your input directory contains dataset subdirectories"
+        exit 1
+    }
+    
+    dataset_list = discovered_datasets
+    log.info "Auto-discovered ${dataset_list.size()} dataset(s): ${dataset_list.join(', ')}"
+} else {
+    dataset_list = params.datasets.split(',').collect { it.trim() }
+    log.info "Processing ${dataset_list.size()} specified dataset(s): ${dataset_list.join(', ')}"
 }
 
 // Load config file if provided
