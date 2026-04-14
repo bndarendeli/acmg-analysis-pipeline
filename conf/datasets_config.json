@@ -1,0 +1,32 @@
+{
+  "foxl2": {
+    "ground_truth": "FOXL2_dataset.xlsx",
+    "results_dir": "results_fix",
+    "tool_files": {
+      "InterVar_2018": "foxl2_hg38_intervar_20180118.txt",
+      "InterVar_2025": "foxl2_hg38_intervar_20250721.txt",
+      "BIAS": "foxl2_hg38_BIAS.tsv",
+      "CharGer_Local": "foxl2_hg38_CharGer_local_annotated_VEPv97.tsv",
+      "CharGer_Online": "foxl2_hg38_CharGer_online.tsv",
+      "DiabloACMG": "foxl2_hg38_DiabloACMG.tsv",
+      "Exomiser": "foxl2_hg38_exomiser.tsv",
+      "Genebe": "foxl2_hg38_genebe.vcf",
+      "TAPES": "foxl2_hg38_tapes.csv",
+      "Franklin": "foxl2_hg19_franklin.csv",
+      "AutoGVP": "foxl2_hg38_autogvp.tsv",
+      "VIP-HL": "foxl2_hg19_viphl.tsv"
+    }
+  },
+  "clingen_28012026": {
+    "ground_truth": "ground_truth.tsv",
+    "results_dir": "tool_results",
+    "tool_files": {
+      "Genebe": "clingen_genebe.vcf",
+      "Franklin": "clingen_franklin.csv",
+      "BIAS": "clingen_BIAS.tsv",
+      "TAPES": "clingen_tapes.csv",
+      "InterVar_2018": "clingen_intervar_20180118.txt",
+      "InterVar_2025": "clingen_intervar_20250721.txt"
+    }
+  }
+}

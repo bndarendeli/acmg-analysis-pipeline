@@ -1,0 +1,37 @@
+# Nextflow
+work/
+.nextflow/
+.nextflow.log*
+*.html
+*.txt
+results/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data
+*.tsv
+*.csv
+*.png
+*.jpg
+*.pdf
+test_data/
