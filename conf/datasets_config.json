@@ -28,5 +28,16 @@
       "InterVar_2018": "clingen_intervar_20180118.txt",
       "InterVar_2025": "clingen_intervar_20250721.txt"
     }
+  },
+  "hgmd_clinvar_cancer": {
+    "ground_truth": "ground_truth.tsv",
+    "results_dir": "tool_results",
+    "tool_files": {
+      "Genebe": "hgmd_clinvar_cancer_genebe.vcf",
+      "Franklin": "hgmd_clinvar_cancer_franklin.csv",
+      "BIAS": "hgmd_clinvar_cancer_BIAS.tsv",
+      "InterVar_2018": "hgmd_clinvar_cancer_intervar_20180118.txt",
+      "InterVar_2025": "hgmd_clinvar_cancer_intervar_20250721.txt"
+    }
   }
 }

@@ -1,13 +1,13 @@
-# ACMG Analysis Pipeline - End-to-End
+# ACMG Analysis Pipeline
 
-Complete pipeline from raw tool outputs to final analysis results.
+Complete end-to-end pipeline for ACMG variant classification tool evaluation.
 
 ## 🚀 Quick Start
 
 ### Full Pipeline (Parse → Merge → Analyze)
 
 ```bash
-nextflow run main_endtoend.nf \
+nextflow run main.nf \
   --input_dir /path/to/datasets \
   --datasets foxl2 \
   --config_file conf/datasets_config.json
@@ -16,7 +16,7 @@ nextflow run main_endtoend.nf \
 ### Skip Parsing (Use Existing Merged Results)
 
 ```bash
-nextflow run main_endtoend.nf \
+nextflow run main.nf \
   --input_dir /path/to/datasets \
   --datasets foxl2 \
   --skip_parsing
@@ -43,40 +43,67 @@ Results + Publication-Ready Figures
 
 ## 📁 Input Directory Structure
 
-### For Full Pipeline (with Parsing)
+### Required Inputs
+
+Each dataset requires:
+1. **Ground truth file** - Variant classifications (Excel or TSV)
+2. **Tool results directory** - Raw output files from ACMG classification tools
+
+### Example: FOXL2 Dataset
 
 ```
 input_dir/
 └── foxl2/
     ├── FOXL2_dataset.xlsx          # Ground truth
-    └── results_fix/                # Raw tool outputs
+    └── results_fix/                # Tool results directory
         ├── foxl2_hg38_genebe.vcf
         ├── foxl2_hg38_intervar_20180118.txt
-        ├── foxl2_hg38_intervar_20250721.txt
         ├── foxl2_hg38_BIAS.tsv
-        ├── foxl2_hg38_CharGer_local_annotated_VEPv97.tsv
-        ├── foxl2_hg38_CharGer_online.tsv
         ├── foxl2_hg38_DiabloACMG.tsv
         ├── foxl2_hg38_exomiser.tsv
-        ├── foxl2_hg38_tapes.csv
-        ├── foxl2_hg19_franklin.csv
-        ├── foxl2_hg38_autogvp.tsv
-        └── foxl2_hg19_viphl.tsv
+        └── ... (other tool outputs)
+```
+
+### Example: ClinGen Dataset
+
+```
+input_dir/
+└── clingen_28012026/
+    ├── ground_truth.tsv            # Ground truth
+    └── tool_results/               # Tool results directory
+        ├── clingen_genebe.vcf
+        ├── clingen_intervar.txt
+        ├── clingen_BIAS.tsv
+        └── ... (other tool outputs)
+```
+
+### Example: HGMD-ClinVar Dataset
+
+```
+input_dir/
+└── hgmd_clinvar_cancer/
+    ├── ground_truth.tsv            # Ground truth
+    └── tool_results/               # Tool results directory
+        ├── hgmd_clinvar_genebe.vcf
+        ├── hgmd_clinvar_franklin.csv
+        └── ... (other tool outputs)
 ```
 
 ### For Skip Parsing Mode
 
+If you already have merged results:
+
 ```
 input_dir/
-└── foxl2/
+└── <dataset>/
     └── analysis/
         └── results/
-            └── foxl2_merged_results.tsv  # Pre-existing merged results
+            └── <dataset>_merged_results.tsv
 ```
 
 ## ⚙️ Configuration File
 
-Create `conf/datasets_config.json`:
+Create `conf/datasets_config.json` to specify dataset-specific settings:
 
 ```json
 {
@@ -97,9 +124,31 @@ Create `conf/datasets_config.json`:
       "AutoGVP": "foxl2_hg38_autogvp.tsv",
       "VIP-HL": "foxl2_hg19_viphl.tsv"
     }
+  },
+  "clingen_28012026": {
+    "ground_truth": "ground_truth.tsv",
+    "results_dir": "tool_results",
+    "tool_files": {
+      "Genebe": "clingen_genebe.vcf",
+      "Franklin": "clingen_franklin.csv",
+      "BIAS": "clingen_BIAS.tsv",
+      "InterVar_2018": "clingen_intervar_20180118.txt",
+      "InterVar_2025": "clingen_intervar_20250721.txt"
+    }
+  },
+  "hgmd_clinvar_cancer": {
+    "ground_truth": "ground_truth.tsv",
+    "results_dir": "tool_results",
+    "tool_files": {
+      "Genebe": "hgmd_clinvar_genebe.vcf",
+      "Franklin": "hgmd_clinvar_franklin.csv",
+      "BIAS": "hgmd_clinvar_BIAS.tsv"
+    }
   }
 }
 ```
+
+**Note:** Adjust file names and paths according to your actual dataset structure.
 
 ## 📊 Output Structure
 
@@ -134,26 +183,57 @@ results/
 
 ## 📝 Examples
 
-### Example 1: Full Pipeline for FOXL2
-
-```bash
-nextflow run main.nf \
-  --input_dir /mnt/d/busra-research/doktora/1002/code_works/dataset_prep/datasets \
-  --datasets foxl2 \
-  --config_file conf/datasets_config.json \
-  --outdir foxl2_results
-```
-
-### Example 2: Multiple Datasets
+### Example 1: Analyze FOXL2 Dataset
 
 ```bash
 nextflow run main.nf \
   --input_dir /path/to/datasets \
-  --datasets "foxl2,clingen_28012026" \
-  --config_file conf/datasets_config.json
+  --datasets foxl2 \
+  --config_file conf/datasets_config.json \
+  --outdir results/foxl2
 ```
 
-### Example 3: Custom Tools
+### Example 2: Analyze ClinGen Dataset
+
+```bash
+nextflow run main.nf \
+  --input_dir /path/to/datasets \
+  --datasets clingen_28012026 \
+  --config_file conf/datasets_config.json \
+  --outdir results/clingen
+```
+
+### Example 3: Analyze HGMD-ClinVar Dataset
+
+```bash
+nextflow run main.nf \
+  --input_dir /path/to/datasets \
+  --datasets hgmd_clinvar_cancer \
+  --config_file conf/datasets_config.json \
+  --outdir results/hgmd_clinvar
+```
+
+### Example 4: Multiple Datasets
+
+```bash
+nextflow run main.nf \
+  --input_dir /path/to/datasets \
+  --datasets "foxl2,clingen_28012026,hgmd_clinvar_cancer" \
+  --config_file conf/datasets_config.json \
+  --outdir results/all_datasets
+```
+
+### Example 5: Skip Parsing (Use Existing Merged Results)
+
+```bash
+nextflow run main.nf \
+  --input_dir /path/to/datasets \
+  --datasets foxl2 \
+  --skip_parsing \
+  --outdir results/foxl2_analysis_only
+```
+
+### Example 6: Custom Tools Selection
 
 ```bash
 nextflow run main.nf \
@@ -163,7 +243,7 @@ nextflow run main.nf \
   --skip_parsing
 ```
 
-### Example 4: Resume Failed Run
+### Example 7: Resume Failed Run
 
 ```bash
 nextflow run main.nf -resume \
@@ -208,9 +288,10 @@ The pipeline supports parsing for:
 
 ## 📚 Additional Documentation
 
-- `README.md` - Main pipeline documentation (analysis-only mode)
+- `README.md` - This file (main pipeline documentation)
 - `docs/USAGE.md` - Detailed usage guide
-- `example_endtoend_run.sh` - Example run scripts
+- `example_run.sh` - Example run scripts
+- `conf/datasets_config.json` - Dataset configuration examples
 
 ## � Analysis Modules
 
