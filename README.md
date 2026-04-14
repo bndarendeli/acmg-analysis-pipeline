@@ -2,7 +2,7 @@
 
 Complete end-to-end pipeline for ACMG variant classification tool evaluation.
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Full Pipeline (Parse → Merge → Analyze)
 
@@ -495,10 +495,11 @@ The pipeline supports parsing for:
 
 ## 📚 Additional Documentation
 
-- `README.md` - This file (main pipeline documentation)
-- `docs/USAGE.md` - Detailed usage guide
-- `example_run.sh` - Example run scripts
-- `conf/datasets_config.json` - Dataset configuration examples
+- **[QUICKSTART.md](docs/QUICKSTART.md)** - Step-by-step tutorial from zero ⭐
+- **[USAGE.md](docs/USAGE.md)** - Detailed usage guide
+- **[README.md](README.md)** - This file (main documentation)
+- **[example_run.sh](example_run.sh)** - Example run scripts
+- **[datasets_config.json](conf/datasets_config.json)** - Dataset configuration examples
 
 ## � Analysis Modules
 
